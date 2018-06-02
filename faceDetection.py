@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[20]:
+# In[ ]:
 
 
 # !apt-get install -y -qq software-properties-common python-software-properties module-init-tools
@@ -36,7 +36,13 @@
 # !google-drive-ocamlfuse drive
 
 
-# In[21]:
+# In[ ]:
+
+
+# !ls drive/ColabNotebooks/
+
+
+# In[ ]:
 
 
 import numpy as np
@@ -49,7 +55,26 @@ import matplotlib.image as mpimg
 from PIL import Image
 
 
-# In[109]:
+# In[ ]:
+
+
+def load_data(): # load dataset from breast cancer file
+    samples = []
+    labels = []
+    with open('breastcancer_data.csv', 'r') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if row[1] == 'M': labels.append(1)
+            else: labels.append(0)
+
+            samples.append([float(i) for i in row[2:]])
+    samples, labels = np.array(samples), np.array(labels).reshape(-1, 1) # prevent returning a ranked-1-array
+    samples = (samples - np.mean(samples, axis=1).reshape(-1, 1))/np.std(samples, axis=1).reshape(-1, 1)
+
+    return samples, labels
+
+
+# In[ ]:
 
 
 def initialize_parameters(n_input, n_hidden): # initialize parameters with tiny random numbers
@@ -69,7 +94,7 @@ def initialize_parameters(n_input, n_hidden): # initialize parameters with tiny 
     return parameters
 
 
-# In[24]:
+# In[ ]:
 
 
 def relu(z):
@@ -81,7 +106,7 @@ def relu_derivative(z):
     return der
 
 
-# In[55]:
+# In[ ]:
 
 
 def forward_prop(x, parameters, activation, keep_prop=1.0):
@@ -107,7 +132,7 @@ def forward_prop(x, parameters, activation, keep_prop=1.0):
     return cache
 
 
-# In[46]:
+# In[ ]:
 
 
 def back_prop(x, y, cache, parameters, activation, _lambda):
@@ -134,7 +159,7 @@ def back_prop(x, y, cache, parameters, activation, _lambda):
     return gradients
 
 
-# In[47]:
+# In[ ]:
 
 
 def cost_function(m, labels, y_hat, params, lambd): # regularized
@@ -143,7 +168,7 @@ def cost_function(m, labels, y_hat, params, lambd): # regularized
             np.power(np.linalg.norm(params['w'+str(i)]), 2) for i in range(1, last_layer+1)])
 
 
-# In[106]:
+# In[ ]:
 
 
 def multi_Layered_NN(samples, labels, n_hidden, num_iterations, activation="tanh", learning_rate=0.01, _lambda=0, keep_prob_dropout=1.0, print_cost=False):
@@ -171,7 +196,7 @@ def multi_Layered_NN(samples, labels, n_hidden, num_iterations, activation="tanh
            }
 
 
-# In[49]:
+# In[ ]:
 
 
 def predict(x, parameters, activation):
@@ -186,11 +211,11 @@ def predict(x, parameters, activation):
 
 # ## load dataset section
 
-# In[50]:
+# In[ ]:
 
 
 import scipy.io
-samples = scipy.io.loadmat('olivettifaces.mat')
+samples = scipy.io.loadmat('drive/ColabNotebooks/olivettifaces.mat')
 samples = samples['faces'].T
 labels = np.ones((samples.shape[0], 1))
 artificialZeroData = np.random.randint(0, 256, (samples.shape[0], samples.shape[1]))
@@ -212,7 +237,7 @@ samples, samples_sparse, labels = shuffle(samples, samples_sparse, labels)
 train_data, test_data, train_label, test_label = train_test_split(samples, labels, test_size=0.30, random_state=4)
 
 
-# In[98]:
+# In[ ]:
 
 
 print(samples.shape, labels.shape)
@@ -220,7 +245,7 @@ print(samples.shape, labels.shape)
 
 # ## train section
 
-# In[117]:
+# In[ ]:
 
 
 import time
@@ -230,17 +255,17 @@ activation_function = 'tanh'
 model = multi_Layered_NN(train_data.T,
                          train_label,
                          activation=activation_function,
-                         n_hidden=[100, 200, 200, 200, 100],
-                         num_iterations=5000,
-                         learning_rate=0.001,
+                         n_hidden=[100, 200, 200, 100],
+                         num_iterations=10000,
+                         learning_rate=0.01,
                          _lambda = 0.000000001,
-                         keep_prob_dropout= 0.8,
+                         keep_prob_dropout= 0.7,
                          print_cost=True)
 
 print("Train phase time:", time.time()-tic)
 
 
-# In[111]:
+# In[ ]:
 
 
 pred_labels = predict(train_data, parameters=model['parameters'], activation=activation_function)
@@ -251,7 +276,7 @@ print('accuracy on test set:', (np.sum(pred_labels == test_label)/pred_labels.si
 
 # ### plot cost value
 
-# In[112]:
+# In[ ]:
 
 
 plt.plot(range(len(model['cost_history'])), model['cost_history'])
@@ -260,10 +285,10 @@ plt.show()
 
 # ### test an example of test set
 
-# In[113]:
+# In[ ]:
 
 
-photo_number = 192
+photo_number = 11
 imgplot = plt.imshow(test_data[photo_number].reshape(64, 64))
 plt.show()
 pred_labels = predict(test_data[photo_number].reshape(1, -1), parameters=model['parameters'], activation=activation_function)
@@ -277,7 +302,7 @@ else:
 # ### predict an example from you
 # It must be a 64*64 photo.
 
-# In[94]:
+# In[ ]:
 
 
 # myimg = mpimg.imread('myimg.jpg')
@@ -309,27 +334,27 @@ def predict_new_photo(photo_name):
         print('Not-Human')
 
 
-# In[114]:
+# In[ ]:
 
 
 m = 6
 plt.subplot(m,1, 1)
-predict_new_photo('myimg.jpg')
+predict_new_photo('drive/ColabNotebooks/myimg.jpg')
 plt.subplot(m,1, 2)
-predict_new_photo('myimg2.jpg')
+predict_new_photo('drive/ColabNotebooks/myimg2.jpg')
 plt.subplot(m,1, 3)
-predict_new_photo('myimg3.jpg')
+predict_new_photo('drive/ColabNotebooks/myimg3.jpg')
 plt.subplot(m,1, 4)
-predict_new_photo('myimg4.jpg')
+predict_new_photo('drive/ColabNotebooks/myimg4.jpg')
 plt.subplot(m,1, 5)
-predict_new_photo('myimg6.jpg')
+predict_new_photo('drive/ColabNotebooks/myimg6.jpg')
 plt.subplot(m,1, 6)
-predict_new_photo('myimg5.jpg')
+predict_new_photo('drive/ColabNotebooks/myimg5.jpg')
 
 
 # ### run a package with the same parameters to check it
 
-# In[88]:
+# In[ ]:
 
 
 from sklearn.neural_network import MLPClassifier
@@ -342,7 +367,7 @@ print('accuracy on test set:', clf.score(test_data, test_label)*100)
 print('loss:', clf.loss_)
 
 
-# In[89]:
+# In[ ]:
 
 
 myimg = mpimg.imread('out.jpg')
